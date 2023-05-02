@@ -1,6 +1,8 @@
 using EntityFramework_Slider.Data;
+using EntityFramework_Slider.Models;
 using EntityFramework_Slider.Services;
 using EntityFramework_Slider.Services.Interface;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +18,19 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 });
 
 
+builder.Services.AddIdentity<AppUser,IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+builder.Services.Configure<IdentityOptions>(opt =>
+{
+    opt.Password.RequiredLength = 8;
+    opt.Password.RequireDigit= true;
+    opt.Password.RequireLowercase= true;
+    opt.Password.RequireUppercase= true;
+    opt.Password.RequireNonAlphanumeric= true;
+    opt.User.RequireUniqueEmail= true;
+    opt.Lockout.MaxFailedAccessAttempts= 3;
+    opt.Lockout.DefaultLockoutTimeSpan= TimeSpan.FromMinutes(30);
+    opt.Lockout.AllowedForNewUsers= true;
+});
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
@@ -39,6 +54,8 @@ app.UseStaticFiles();
 app.UseSession();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
